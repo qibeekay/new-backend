@@ -69,14 +69,14 @@ In your Render Web Service dashboard under the **Environment** tab, add the foll
 | Key | Value / Source | Description |
 | :--- | :--- | :--- |
 | `PORT` | `10000` | Render standard port |
-| `DATABASE_URL` | `postgresql://neondb_owner:npg_ewhrNGpf4nk7@ep-hidden-mountain-b4bjaojg.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require` | Your Neon connection string |
-| `JWT_SECRET` | `super-secret-jwt-key-with-at-least-32-chars-long-12345` | Random 32+ char secret for JWT tokens |
+| `DATABASE_URL` | `postgresql://<user>:<password>@<neon-host>/neondb?sslmode=require` | Your Neon connection string from Neon Console |
+| `JWT_SECRET` | `<your-32-character-secret>` | Random 32+ character string for JWT tokens |
 | `ADMIN_EMAIL` | `admin@example.com` | Admin login email |
-| `ADMIN_PASSWORD_HASH` | `$2a$10$jrOqvF3u7erdo3VwAkPKMOw8dNPWKkEWIN4ffJ8AdTYNU7s7Dbhzq` | Bcrypt hash for `admin123` (or generate with `cmd/hashpw`) |
+| `ADMIN_PASSWORD_HASH` | `<bcrypt-hash>` | Generated bcrypt hash (generate with `go run ./cmd/hashpw <password>`) |
 | `ALLOWED_ORIGINS` | `http://localhost:5173,https://qibeekay.vercel.app` | Comma-separated frontend URLs allowed by CORS |
-| `CLOUDINARY_CLOUD_NAME` | `dfdzkkjqm` | Cloudinary Cloud Name |
-| `CLOUDINARY_API_KEY` | `623454353656663` | Cloudinary API Key |
-| `CLOUDINARY_API_SECRET` | `EkOlzVKj8jMbWd9ATexg-J3xsNA` | Cloudinary API Secret |
+| `CLOUDINARY_CLOUD_NAME` | `<your-cloud-name>` | Cloudinary Cloud Name |
+| `CLOUDINARY_API_KEY` | `<your-api-key>` | Cloudinary API Key |
+| `CLOUDINARY_API_SECRET` | `<your-api-secret>` | Cloudinary API Secret |
 | `CLOUDINARY_FOLDER` | `portfolio` | Cloudinary media folder |
 | `MAX_UPLOAD_MB` | `5` | Maximum image upload size |
 
