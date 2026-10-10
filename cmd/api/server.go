@@ -20,10 +20,12 @@ type Server struct{ http *http.Server }
 func NewServer(cfg *config.Config, repo *repository.Repository) *Server {
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery(), cors.New(cors.Config{
-		AllowOrigins: cfg.AllowedOrigins,
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders: []string{"Authorization", "Content-Type"},
-		MaxAge:       12 * time.Hour,
+		AllowOrigins:     cfg.AllowedOrigins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	}))
 	routes.Setup(r, cfg, repo)
 

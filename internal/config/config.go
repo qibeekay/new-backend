@@ -54,6 +54,15 @@ func Load() (*Config, error) {
 		keepAlive = os.Getenv("RENDER_EXTERNAL_URL")
 	}
 
+	rawOrigins := strings.Split(getEnv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000,https://qibeekay.vercel.app"), ",")
+	origins := make([]string, 0, len(rawOrigins))
+	for _, o := range rawOrigins {
+		o = strings.TrimSpace(o)
+		if o != "" {
+			origins = append(origins, strings.TrimRight(o, "/"))
+		}
+	}
+
 	cfg := &Config{
 		Port:                getEnv("PORT", "8080"),
 		DatabaseURL:         os.Getenv("DATABASE_URL"),
@@ -62,7 +71,7 @@ func Load() (*Config, error) {
 		AdminPasswordHash:   os.Getenv("ADMIN_PASSWORD_HASH"),
 		UploadDir:           getEnv("UPLOAD_DIR", "./uploads"),
 		PublicBaseURL:       strings.TrimRight(publicBase, "/"),
-		AllowedOrigins:      strings.Split(getEnv("ALLOWED_ORIGINS", "http://localhost:5173"), ","),
+		AllowedOrigins:      origins,
 		MaxUploadBytes:      mb << 20,
 		CloudinaryCloudName: os.Getenv("CLOUDINARY_CLOUD_NAME"),
 		CloudinaryAPIKey:    os.Getenv("CLOUDINARY_API_KEY"),
