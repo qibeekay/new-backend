@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: portfolio-api
+    runtime: go
+    plan: free
+    region: oregon
+    buildCommand: go run ./migrate up && go build -o bin/api ./cmd/api
+    startCommand: ./bin/api
+    healthCheckPath: /healthz
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_FOLDER
+        value: portfolio
+      - key: MAX_UPLOAD_MB
+        value: 5

@@ -1,0 +1,440 @@
+basePath: /api
+definitions:
+  handlers.LoginRequest:
+    properties:
+      email:
+        example: admin@example.com
+        type: string
+      password:
+        example: admin123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.LoginResponse:
+    properties:
+      expiresAt:
+        type: string
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  handlers.UploadResponse:
+    properties:
+      url:
+        example: https://res.cloudinary.com/demo/image/upload/sample.jpg
+        type: string
+    type: object
+  models.Metric:
+    properties:
+      label:
+        example: Throughput increase
+        type: string
+      value:
+        example: 10x
+        type: string
+    type: object
+  models.Project:
+    properties:
+      category:
+        enum:
+        - creative
+        - functional
+        - systems
+        example: systems
+        type: string
+      codeUrl:
+        example: https://github.com/example/ledger
+        type: string
+      description:
+        example: Designed and implemented an immutable distributed ledger with sub-millisecond
+          query performance.
+        type: string
+      featured:
+        example: true
+        type: boolean
+      id:
+        example: ledger-api-lx7y
+        type: string
+      image:
+        example: https://example.com/cover.jpg
+        type: string
+      imageAlt:
+        example: Project preview screenshot
+        type: string
+      liveUrl:
+        example: https://example.com
+        type: string
+      metrics:
+        items:
+          $ref: '#/definitions/models.Metric'
+        type: array
+      role:
+        example: Lead Backend Engineer
+        type: string
+      stack:
+        example:
+        - Go
+        - PostgreSQL
+        - Docker
+        items:
+          type: string
+        type: array
+      status:
+        enum:
+        - completed
+        - ongoing
+        - ideating
+        - paused
+        example: completed
+        type: string
+      tagline:
+        example: High-throughput financial ledger
+        type: string
+      title:
+        example: Ledger API
+        type: string
+      year:
+        example: "2024"
+        type: string
+    type: object
+  models.ProjectInput:
+    properties:
+      category:
+        enum:
+        - creative
+        - functional
+        - systems
+        example: systems
+        type: string
+      codeUrl:
+        example: https://github.com/example/ledger
+        type: string
+      description:
+        example: Designed and implemented an immutable distributed ledger with sub-millisecond
+          query performance.
+        type: string
+      featured:
+        example: true
+        type: boolean
+      image:
+        example: https://example.com/cover.jpg
+        type: string
+      imageAlt:
+        example: Project preview screenshot
+        type: string
+      liveUrl:
+        example: https://example.com
+        type: string
+      metrics:
+        items:
+          $ref: '#/definitions/models.Metric'
+        type: array
+      role:
+        example: Lead Backend Engineer
+        type: string
+      stack:
+        example:
+        - Go
+        - PostgreSQL
+        - Docker
+        items:
+          type: string
+        type: array
+      status:
+        enum:
+        - completed
+        - ongoing
+        - ideating
+        - paused
+        example: completed
+        type: string
+      tagline:
+        example: High-throughput financial ledger
+        type: string
+      title:
+        example: Ledger API
+        type: string
+      year:
+        example: "2024"
+        type: string
+    type: object
+  response.ErrorEnvelope:
+    properties:
+      error:
+        example: invalid request body
+        type: string
+    type: object
+  response.ValidationEnvelope:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: API Support
+    url: http://localhost:8080
+  description: 'Backend REST API for Portfolio platform: projects showcase, admin
+    authentication, and media uploads.'
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Portfolio API
+  version: "1.0"
+paths:
+  /admin/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates the administrator using email and password, returning
+        a JWT token
+      parameters:
+      - description: Admin login credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      summary: Admin login
+      tags:
+      - auth
+  /admin/projects:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new portfolio project (Admin only)
+      parameters:
+      - description: Project details
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProjectInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Project'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.ValidationEnvelope'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create a project
+      tags:
+      - admin-projects
+  /admin/projects/{id}:
+    delete:
+      description: Deletes a project by ID (Admin only)
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Project deleted successfully
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Delete a project
+      tags:
+      - admin-projects
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing project by ID (Admin only)
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Project details
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProjectInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Project'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.ValidationEnvelope'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Update a project
+      tags:
+      - admin-projects
+  /admin/uploads:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads an image file (JPEG, PNG, WebP, GIF) to Cloudinary (or
+        local storage fallback) and returns the public asset URL (Admin only)
+      parameters:
+      - description: Image file to upload (JPEG, PNG, WebP, GIF, up to 5MB)
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.UploadResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "415":
+          description: Unsupported Media Type
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Upload an image asset
+      tags:
+      - admin-uploads
+  /projects:
+    get:
+      description: Returns all projects ordered by newest first
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Project'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      summary: List projects
+      tags:
+      - projects
+  /projects/{id}:
+    get:
+      description: Returns a single project by ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Project'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorEnvelope'
+      summary: Get a project
+      tags:
+      - projects
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and your JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
