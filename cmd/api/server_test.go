@@ -19,18 +19,35 @@ func TestCORS(t *testing.T) {
 
 	srv := NewServer(cfg, repository.New(nil))
 
-	req, _ := http.NewRequest(http.MethodOptions, "/api/projects", nil)
-	req.Header.Set("Origin", "https://qibeekay.vercel.app")
-	req.Header.Set("Access-Control-Request-Method", "GET")
-
-	w := httptest.NewRecorder()
-	srv.http.Handler.ServeHTTP(w, req)
-
-	t.Logf("Response status: %d, headers: %#v", w.Code, w.Header())
-	if w.Code != http.StatusNoContent && w.Code != http.StatusOK {
-		t.Errorf("expected 200 or 204 for CORS preflight, got %d", w.Code)
+	tests := []struct {
+		origin  string
+		allowed bool
+	}{
+		{"https://qibeekay.vercel.app", true},
+		{"https://preview-deploy.vercel.app", true},
+		{"http://localhost:5173", true},
+		{"https://evil.com", false},
 	}
-	if w.Header().Get("Access-Control-Allow-Origin") != "https://qibeekay.vercel.app" {
-		t.Errorf("expected Access-Control-Allow-Origin: https://qibeekay.vercel.app, got %q", w.Header().Get("Access-Control-Allow-Origin"))
+
+	for _, tt := range tests {
+		req, _ := http.NewRequest(http.MethodOptions, "/api/projects", nil)
+		req.Header.Set("Origin", tt.origin)
+		req.Header.Set("Access-Control-Request-Method", "GET")
+
+		w := httptest.NewRecorder()
+		srv.http.Handler.ServeHTTP(w, req)
+
+		if tt.allowed {
+			if w.Code != http.StatusNoContent && w.Code != http.StatusOK {
+				t.Errorf("origin %s: expected 200 or 204, got %d", tt.origin, w.Code)
+			}
+			if w.Header().Get("Access-Control-Allow-Origin") != tt.origin {
+				t.Errorf("origin %s: expected header %q, got %q", tt.origin, tt.origin, w.Header().Get("Access-Control-Allow-Origin"))
+			}
+		} else {
+			if w.Header().Get("Access-Control-Allow-Origin") != "" {
+				t.Errorf("origin %s: expected no CORS header, got %q", tt.origin, w.Header().Get("Access-Control-Allow-Origin"))
+			}
+		}
 	}
 }

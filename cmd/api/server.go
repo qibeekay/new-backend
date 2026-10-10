@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -19,14 +20,24 @@ type Server struct{ http *http.Server }
 
 func NewServer(cfg *config.Config, repo *repository.Repository) *Server {
 	r := gin.New()
-	r.Use(gin.Logger(), gin.Recovery(), cors.New(cors.Config{
-		AllowOrigins:     cfg.AllowedOrigins,
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	corsCfg := cors.Config{
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"},
 		AllowHeaders:     []string{"Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
-	}))
+		AllowOriginFunc: func(origin string) bool {
+			originNorm := strings.TrimRight(strings.ToLower(origin), "/")
+			for _, o := range cfg.AllowedOrigins {
+				oNorm := strings.TrimRight(strings.ToLower(o), "/")
+				if oNorm == "*" || oNorm == originNorm {
+					return true
+				}
+			}
+			return strings.HasSuffix(originNorm, ".vercel.app")
+		},
+	}
+	r.Use(gin.Logger(), gin.Recovery(), cors.New(corsCfg))
 	routes.Setup(r, cfg, repo)
 
 	return &Server{http: &http.Server{
